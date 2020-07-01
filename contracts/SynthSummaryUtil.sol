@@ -26,61 +26,24 @@ interface IAddressResolver {
     function requireAndGetAddress(bytes32 name, string calldata reason) external view returns (address);
 }
 
+contract SynthSummaryUtil {
 
-contract Owned {
-    address public owner;
-    address public nominatedOwner;
-
-    constructor(address _owner) public {
-        require(_owner != address(0), "Owner address cannot be 0");
-        owner = _owner;
-        emit OwnerChanged(address(0), _owner);
-    }
-
-    function nominateNewOwner(address _owner) external onlyOwner {
-        nominatedOwner = _owner;
-        emit OwnerNominated(_owner);
-    }
-
-    function acceptOwnership() external {
-        require(msg.sender == nominatedOwner, "You must be nominated before you can accept ownership");
-        emit OwnerChanged(owner, nominatedOwner);
-        owner = nominatedOwner;
-        nominatedOwner = address(0);
-    }
-
-    modifier onlyOwner {
-        require(msg.sender == owner, "Only the contract owner may perform this action");
-        _;
-    }
-
-    event OwnerNominated(address newOwner);
-    event OwnerChanged(address oldOwner, address newOwner);
-}
-
-
-contract SynthSummaryUtil is Owned {
-
-    IAddressResolver public addressResolver;
+    IAddressResolver public addressResolverProxy;
 
     bytes32 internal constant CONTRACT_SYNTHETIX = "Synthetix";
     bytes32 internal constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 internal constant SUSD = "sUSD";
 
     constructor(address resolver) public Owned(msg.sender) {
-        addressResolver = IAddressResolver(resolver);
+        addressResolverProxy = IAddressResolver(resolver);
     }
 
     function _synthetix() internal view returns (ISynthetix) {
-        return ISynthetix(addressResolver.requireAndGetAddress(CONTRACT_SYNTHETIX, "Missing Synthetix address"));
+        return ISynthetix(addressResolverProxy.requireAndGetAddress(CONTRACT_SYNTHETIX, "Missing Synthetix address"));
     }
 
     function _exchangeRates() internal view returns (IExchangeRates) {
-        return IExchangeRates(addressResolver.requireAndGetAddress(CONTRACT_EXRATES, "Missing ExchangeRates address"));
-    }
-
-    function setAddressResolver(IAddressResolver resolver) external onlyOwner {
-        addressResolver = resolver;
+        return IExchangeRates(addressResolverProxy.requireAndGetAddress(CONTRACT_EXRATES, "Missing ExchangeRates address"));
     }
 
     function totalSynthsInKey(address account, bytes32 currencyKey) external view returns (uint total) {
