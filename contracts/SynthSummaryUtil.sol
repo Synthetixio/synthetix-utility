@@ -34,7 +34,7 @@ contract SynthSummaryUtil {
     bytes32 internal constant CONTRACT_EXRATES = "ExchangeRates";
     bytes32 internal constant SUSD = "sUSD";
 
-    constructor(address resolver) public Owned(msg.sender) {
+    constructor(address resolver) public {
         addressResolverProxy = IAddressResolver(resolver);
     }
 
