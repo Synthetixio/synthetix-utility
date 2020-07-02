@@ -182,9 +182,14 @@ contract BinaryOptionMarketData {
     struct Resolution {
         bool resolved;
         bool canResolve;
-
     }
 
+    struct OraclePriceAndTimestamp {
+        uint price;
+        uint updatedAt;
+    }
+
+    // used for things that don't change over the lifetime of the contract
     struct MarketParameters {
         address creator;
         IBinaryOptionMarket.Options options;
@@ -195,6 +200,7 @@ contract BinaryOptionMarketData {
     }
 
     struct MarketData {
+        OraclePriceAndTimestamp oraclePriceAndTimestamp;
         IBinaryOptionMarket.Prices prices;
         Deposits deposits;
         Resolution resolution;
@@ -235,12 +241,14 @@ contract BinaryOptionMarketData {
 
     function getMarketData(IBinaryOptionMarket market) public view returns (MarketData memory) {
 
+        (uint price, uint updatedAt) = market.oraclePriceAndTimestamp();
         (uint longClaimable, uint shortClaimable) = market.totalClaimableSupplies();
         (uint longSupply, uint shortSupply) = market.totalSupplies();
         (uint longBids, uint shortBids) = market.totalBids();
         (uint longPrice, uint shortPrice) = market.prices();
 
         return MarketData(
+            OraclePriceAndTimestamp(price, updatedAt),
             IBinaryOptionMarket.Prices(longPrice, shortPrice),
             Deposits(market.deposited(), market.exercisableDeposits()),
             Resolution(market.resolved(), market.canResolve()),
@@ -252,7 +260,7 @@ contract BinaryOptionMarketData {
         );
     }
 
-    function getAccountMarketInfo(IBinaryOptionMarket market, address account) public view returns (AccountData memory) {
+    function getAccountMarketData(IBinaryOptionMarket market, address account) public view returns (AccountData memory) {
         (uint longBid, uint shortBid) = market.bidsOf(account);
         (uint longClaimable, uint shortClaimable) = market.claimableBalancesOf(account);
         (uint longBalance, uint shortBalance) = market.balancesOf(account);
@@ -264,4 +272,3 @@ contract BinaryOptionMarketData {
         );
     }
 }
-
