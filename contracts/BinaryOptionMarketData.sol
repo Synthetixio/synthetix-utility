@@ -108,6 +108,11 @@ interface IBinaryOptionMarket {
         uint finalPrice;
     }
 
+    struct OraclePriceAndTimestamp {
+        uint price;
+        uint updatedAt;
+    }
+
     /* ========== VIEWS / VARIABLES ========== */
 
     function options() external view returns (IBinaryOption long, IBinaryOption short);
@@ -189,6 +194,7 @@ contract BinaryOptionMarketData {
         address creator;
         IBinaryOptionMarket.Options options;
         IBinaryOptionMarket.Times times;
+        IBinaryOptionMarket.OraclePriceAndTimestamp oraclePriceAndTimestamp;
         IBinaryOptionMarket.OracleDetails oracleDetails;
         IBinaryOptionMarketManager.Fees fees;
         IBinaryOptionMarketManager.CreatorLimits creatorLimits;
@@ -215,6 +221,7 @@ contract BinaryOptionMarketData {
 
         (IBinaryOption long, IBinaryOption short) = market.options();
         (uint biddingEndDate, uint maturityDate, uint expiryDate) = market.times();
+        (uint price, uint updatedAt) = market.oraclePriceAndTimestamp();
         (bytes32 key, uint strikePrice, uint finalPrice) = market.oracleDetails();
         (uint poolFee, uint creatorFee, uint refundFee) = market.fees();
 
@@ -222,6 +229,7 @@ contract BinaryOptionMarketData {
             market.creator(),
             IBinaryOptionMarket.Options(long, short),
             IBinaryOptionMarket.Times(biddingEndDate,maturityDate,expiryDate),
+            IBinaryOptionMarket.OraclePriceAndTimestamp(price, updatedAt),
             IBinaryOptionMarket.OracleDetails(key, strikePrice, finalPrice),
             IBinaryOptionMarketManager.Fees(poolFee, creatorFee, refundFee),
             IBinaryOptionMarketManager.CreatorLimits(0, 0)
@@ -252,7 +260,7 @@ contract BinaryOptionMarketData {
         );
     }
 
-    function getAccountMarketInfo(IBinaryOptionMarket market, address account) public view returns (AccountData memory) {
+    function getAccountMarketData(IBinaryOptionMarket market, address account) public view returns (AccountData memory) {
         (uint longBid, uint shortBid) = market.bidsOf(account);
         (uint longClaimable, uint shortClaimable) = market.claimableBalancesOf(account);
         (uint longBalance, uint shortBalance) = market.balancesOf(account);
