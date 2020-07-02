@@ -194,13 +194,13 @@ contract BinaryOptionMarketData {
         address creator;
         IBinaryOptionMarket.Options options;
         IBinaryOptionMarket.Times times;
-        IBinaryOptionMarket.OraclePriceAndTimestamp oraclePriceAndTimestamp;
         IBinaryOptionMarket.OracleDetails oracleDetails;
         IBinaryOptionMarketManager.Fees fees;
         IBinaryOptionMarketManager.CreatorLimits creatorLimits;
     }
 
     struct MarketData {
+        IBinaryOptionMarket.OraclePriceAndTimestamp oraclePriceAndTimestamp;
         IBinaryOptionMarket.Prices prices;
         Deposits deposits;
         Resolution resolution;
@@ -221,7 +221,6 @@ contract BinaryOptionMarketData {
 
         (IBinaryOption long, IBinaryOption short) = market.options();
         (uint biddingEndDate, uint maturityDate, uint expiryDate) = market.times();
-        (uint price, uint updatedAt) = market.oraclePriceAndTimestamp();
         (bytes32 key, uint strikePrice, uint finalPrice) = market.oracleDetails();
         (uint poolFee, uint creatorFee, uint refundFee) = market.fees();
 
@@ -229,7 +228,6 @@ contract BinaryOptionMarketData {
             market.creator(),
             IBinaryOptionMarket.Options(long, short),
             IBinaryOptionMarket.Times(biddingEndDate,maturityDate,expiryDate),
-            IBinaryOptionMarket.OraclePriceAndTimestamp(price, updatedAt),
             IBinaryOptionMarket.OracleDetails(key, strikePrice, finalPrice),
             IBinaryOptionMarketManager.Fees(poolFee, creatorFee, refundFee),
             IBinaryOptionMarketManager.CreatorLimits(0, 0)
@@ -243,12 +241,14 @@ contract BinaryOptionMarketData {
 
     function getMarketData(IBinaryOptionMarket market) public view returns (MarketData memory) {
 
+        (uint price, uint updatedAt) = market.oraclePriceAndTimestamp();
         (uint longClaimable, uint shortClaimable) = market.totalClaimableSupplies();
         (uint longSupply, uint shortSupply) = market.totalSupplies();
         (uint longBids, uint shortBids) = market.totalBids();
         (uint longPrice, uint shortPrice) = market.prices();
 
         return MarketData(
+            IBinaryOptionMarket.OraclePriceAndTimestamp(price, updatedAt),
             IBinaryOptionMarket.Prices(longPrice, shortPrice),
             Deposits(market.deposited(), market.exercisableDeposits()),
             Resolution(market.resolved(), market.canResolve()),
@@ -272,4 +272,3 @@ contract BinaryOptionMarketData {
         );
     }
 }
-
