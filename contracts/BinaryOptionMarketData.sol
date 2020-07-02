@@ -190,6 +190,7 @@ contract BinaryOptionMarketData {
 
     }
 
+    // used for things that don't change over the lifetime of the contract
     struct MarketParameters {
         address creator;
         IBinaryOptionMarket.Options options;
