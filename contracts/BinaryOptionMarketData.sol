@@ -108,11 +108,6 @@ interface IBinaryOptionMarket {
         uint finalPrice;
     }
 
-    struct OraclePriceAndTimestamp {
-        uint price;
-        uint updatedAt;
-    }
-
     /* ========== VIEWS / VARIABLES ========== */
 
     function options() external view returns (IBinaryOption long, IBinaryOption short);
@@ -187,7 +182,11 @@ contract BinaryOptionMarketData {
     struct Resolution {
         bool resolved;
         bool canResolve;
+    }
 
+    struct OraclePriceAndTimestamp {
+        uint price;
+        uint updatedAt;
     }
 
     // used for things that don't change over the lifetime of the contract
@@ -201,7 +200,7 @@ contract BinaryOptionMarketData {
     }
 
     struct MarketData {
-        IBinaryOptionMarket.OraclePriceAndTimestamp oraclePriceAndTimestamp;
+        OraclePriceAndTimestamp oraclePriceAndTimestamp;
         IBinaryOptionMarket.Prices prices;
         Deposits deposits;
         Resolution resolution;
@@ -249,7 +248,7 @@ contract BinaryOptionMarketData {
         (uint longPrice, uint shortPrice) = market.prices();
 
         return MarketData(
-            IBinaryOptionMarket.OraclePriceAndTimestamp(price, updatedAt),
+            OraclePriceAndTimestamp(price, updatedAt),
             IBinaryOptionMarket.Prices(longPrice, shortPrice),
             Deposits(market.deposited(), market.exercisableDeposits()),
             Resolution(market.resolved(), market.canResolve()),
